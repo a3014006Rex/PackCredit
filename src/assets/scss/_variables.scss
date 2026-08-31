@@ -1,0 +1,69 @@
+@forward "./element/custom.scss";
+
+// ─── Legacy Variables (保留既有相容性) ───────────────────────────────────────
+$primary: #075DBA;
+$yellow: #D68B16;
+$yellow-light: #FFF0C7;
+$gray: #61758A;
+$text-primary: #17324D;
+$text-light: #6B7C93;
+$text-placeholder: #94A3B8;
+
+// ─── Design System Variables (現代化 SaaS 設計規範) ──────────────────────────
+// Color Palette
+$color-primary:          #075DBA;  // 主要 CTA 按鈕與強調色
+$color-primary-hover:    #064A95;  // Primary hover 深色
+$color-primary-light:    #E8F6F5;  // Primary 淺背景
+$color-background:       #F6FBFC;  // 整體頁面背景
+$color-surface:          #FFFFFF;  // 卡片 / 獨立區塊
+$color-text-primary:     #17324D;  // 主要文字
+$color-text-secondary:   #5B6F82;  // 次要文字
+$color-border:           #D7EBEA;  // 邊框
+
+// Spacing & Shape
+$border-radius-base:     8px;      // 按鈕 / 卡片統一圓角
+$border-radius-lg:       12px;     // 較大容器
+
+// Shadow
+$shadow-card:            0 4px 12px -2px rgba(7, 93, 186, 0.10);   // 標準卡片陰影
+$shadow-card-hover:      0 12px 24px -6px rgba(7, 93, 186, 0.18); // Hover 卡片陰影
+
+// Transition
+$transition-base:        all 0.3s ease-in-out;
+
+// Typography
+$font-family-base:       'Noto Sans TC', 'Inter', sans-serif;
+$font-weight-heading:    700;
+$font-weight-body:       400;
+$line-height-heading:    1.3;
+$line-height-body:       1.7;
+
+// ─── Mixins ──────────────────────────────────────────────────────────────────
+@mixin scrollbar {
+  &::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  &::-webkit-scrollbar-track {
+    background: $color-surface;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: lighten($color-primary, 35%);
+    border-radius: $border-radius-base;
+    transition: $transition-base;
+  }
+  &::-webkit-scrollbar-thumb:hover {
+    background: lighten($color-primary, 20%);
+  }
+}
+
+@mixin card-base {
+  background-color: $color-surface;
+  border-radius: $border-radius-base;
+  box-shadow: $shadow-card;
+  transition: $transition-base;
+
+  &:hover {
+    box-shadow: $shadow-card-hover;
+  }
+}

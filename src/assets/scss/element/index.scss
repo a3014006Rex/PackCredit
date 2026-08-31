@@ -1,0 +1,71 @@
+@forward "element-plus/theme-chalk/src/common/var.scss" with (
+  $colors: (
+    "primary": (
+      "base": #075dba,
+    ),
+    "success": (
+      "base": #16845b,
+    ),
+    "warning": (
+      "base": #d68b16,
+    ),
+    "danger": (
+      "base": #c5454a,
+    ),
+    "error": (
+      "base": #c5454a,
+    ),
+    "info": (
+      "base": #6b7c93,
+    ),
+    "secondary": (
+      "base": #d8e8e7,
+    ),
+  ),
+  $text-color: (
+    "primary": #17324d,
+    "regular": #263f57,
+    "secondary": #667a8e,
+    "placeholder": #97a7b5,
+    "disabled": #c1cdd5,
+  ),
+
+  // $font-size: (
+  //   "extra-large": 22px,
+  //   "large": 20px,
+  //   "medium": 18px,
+  //   "base": 16px,
+  //   "small": 14px,
+  //   "extra-small": 12px,
+  // ),
+  $common-component-size:
+    (
+      "large": 46px,
+      // 40px
+      "default": 38px,
+      // 32px
+      "small": 30px,
+      // 24px
+    ),
+  $border-color: (
+    "": #b8d1d5,
+    "light": #d7ebea,
+    "lighter": #e7f2f2,
+    "extra-light": #f3fafa,
+    "dark": #a8c4c8,
+    "darker": #93b3b8,
+  ),
+  // $slider: (
+  //   "stop-bg-color": #ffffff00,
+  //   "border-radius": 6px,
+  //   "height": 10px,
+  //   "button-wrapper-offset": -13px,
+  // ),
+  // $dialog:
+  //   (
+  //     "border-radius": 20px,
+  //   ),
+  // $button-font-size: (
+  //   "small": 14px,
+  // )
+);

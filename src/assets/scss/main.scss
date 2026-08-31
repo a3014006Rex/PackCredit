@@ -1,0 +1,373 @@
+@import "../../../node_modules/boxicons/css/boxicons.min.css";
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+TC:wght@200;400;500;600;700;900&display=swap");
+
+// ─── CSS Custom Properties (Design Tokens) ───────────────────────────────────
+:root {
+  // Element Plus overrides
+  --el-font-size-base: 1rem;
+  --el-color-primary: #{$color-primary};
+  --el-color-primary-dark-2: #{$color-primary-hover};
+
+  // Color Palette
+  --color-primary:          #{$color-primary};
+  --color-primary-hover:    #{$color-primary-hover};
+  --color-primary-light:    #{$color-primary-light};
+  --color-background:       #{$color-background};
+  --color-surface:          #{$color-surface};
+  --color-text-primary:     #{$color-text-primary};
+  --color-text-secondary:   #{$color-text-secondary};
+  --color-border:           #{$color-border};
+
+  // Shape
+  --border-radius-base:     #{$border-radius-base};
+  --border-radius-lg:       #{$border-radius-lg};
+
+  // Shadow
+  --shadow-card:            #{$shadow-card};
+  --shadow-card-hover:      #{$shadow-card-hover};
+
+  // Transition
+  --transition-base:        #{$transition-base};
+
+  // Typography
+  --font-family-base:       #{$font-family-base};
+  --font-weight-heading:    #{$font-weight-heading};
+  --font-weight-body:       #{$font-weight-body};
+  --line-height-heading:    #{$line-height-heading};
+  --line-height-body:       #{$line-height-body};
+}
+
+// ─── Base Reset & Typography ─────────────────────────────────────────────────
+pre {
+  font-size: 12px;
+}
+html,
+body {
+  font-size: 14px;
+  color: var(--color-text-primary);
+  margin: 0;
+  // overflow: hidden;
+  font-family: var(--font-family-base);
+  line-height: var(--line-height-body);
+  background-color: var(--color-background);
+}
+
+h1, h2, h3 {
+  font-weight: var(--font-weight-heading);
+  line-height: var(--line-height-heading);
+  color: var(--color-text-primary);
+  margin: 0 0 0.5em;
+}
+
+h4, h5, h6 {
+  font-weight: 600;
+  line-height: var(--line-height-heading);
+  color: var(--color-text-primary);
+  margin: 0 0 0.5em;
+}
+
+p {
+  font-weight: var(--font-weight-body);
+  line-height: var(--line-height-body);
+  color: var(--color-text-secondary);
+  margin: 0 0 1em;
+}
+
+#app {
+  min-width: 960px;
+  height: 100vh;
+  font-size: 1rem;
+}
+* {
+  box-sizing: border-box;
+}
+
+// ─── Primary CTA Button ──────────────────────────────────────────────────────
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 20px;
+  font-family: var(--font-family-base);
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1;
+  color: #ffffff;
+  background-color: var(--color-primary);
+  border: 1px solid var(--color-primary);
+  border-radius: var(--border-radius-base);
+  cursor: pointer;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: var(--transition-base);
+  user-select: none;
+
+  &:hover {
+    background-color: var(--color-primary-hover);
+    border-color: var(--color-primary-hover);
+    box-shadow: 0 4px 12px rgba(7, 93, 186, 0.3);
+    transform: translateY(-1px);
+  }
+
+  &:active {
+    transform: translateY(0);
+    box-shadow: none;
+  }
+
+  &:disabled,
+  &[disabled] {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+
+  // 次要（Outline）變體
+  &--outline {
+    color: var(--color-primary);
+    background-color: transparent;
+    border-color: var(--color-primary);
+
+    &:hover {
+      background-color: var(--color-primary-light);
+      box-shadow: none;
+    }
+  }
+
+  // 小型尺寸
+  &--sm {
+    padding: 6px 14px;
+    font-size: 0.8125rem;
+  }
+
+  // 大型尺寸
+  &--lg {
+    padding: 14px 28px;
+    font-size: 1rem;
+  }
+}
+
+.auth {
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #EAF7F5;
+  .el-card {
+    width: 400px;
+    padding: 10px 20px;
+    border-radius: 10px;
+    .logo {
+      cursor: pointer;
+      display: flex;
+      margin-bottom: 20px;
+      align-items: center;
+      justify-content: center;
+      img {
+        width: 75px;
+        margin-right: 10px;
+      }
+      .site-name {
+        .gov-name {
+          font-weight: bold;
+          font-size: 14px;
+        }
+        .system-name {
+          font-size: 18px;
+          line-height: 18px;
+        }
+      }
+    }
+    h1 {
+      color: $text-primary;
+      font-weight: normal;
+      font-size: 16px;
+      text-align: center;
+    }
+  }
+}
+
+.index {
+  height: 100%;
+  background-color: var(--color-background);
+  .header {
+    z-index: 2;
+    height: 55px;
+    padding: 0px 15px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: white;
+    box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.1);
+    position: relative;
+    .logo {
+      display: flex;
+      align-items: center;
+      user-select: none;
+      img {
+        cursor: pointer;
+        margin-right: 10px;
+        height: 45px;
+      }
+      p {
+        color: var(--color-text-primary);
+        font-size: 14px;
+        letter-spacing: 1px;
+      }
+    }
+    .site-name {
+      border-left: 1px solid var(--color-border);
+      font-size: 16px;
+      line-height: 24px;
+      padding-left: 10px;
+    }
+    i {
+      cursor: pointer;
+      font-size: 20px;
+    }
+    .idle {
+      color: var(--color-text-secondary);
+    }
+    .user {
+      display: flex;
+      align-items: center;
+      user-select: none;
+      .time {
+        color: var(--color-text-secondary);
+        margin-right: 20px;
+      }
+      .tools {
+        display: flex;
+        align-items: center;
+      }
+
+      .user-name {
+        font-weight: 500;
+        font-size: 14px;
+        margin-right: 10px;
+      }
+
+      .user-info {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        margin-right: 10px;
+        .company-name {
+          font-size: 11px;
+          color: $text-light;
+          line-height: 1.2;
+        }
+        .user-name {
+          font-weight: 600;
+          font-size: 14px;
+          margin-right: 0;
+          color: $text-primary;
+        }
+      }
+    }
+  }
+  .body {
+    width: 100%;
+    min-width: 960px;
+    display: flex;
+    .aside {
+      height: calc(100vh - 55px);
+      padding-right: 0;
+      z-index: 1;
+    }
+    .main {
+      height: calc(100vh - 55px);
+      width: 100vw;
+      min-width: 720px;
+      background-color: #EEF8F8;
+      transition: width 0.3s;
+      display: flex;
+      flex-direction: column;
+    }
+  }
+}
+.pay-page {
+  background-color: var(--color-background);
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  .content {
+    position: relative;
+    max-width: 800px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .footer {
+    position: absolute;
+    bottom: 10px;
+    text-align: center;
+    img {
+      width: 50px;
+    }
+    p {
+      color: var(--color-text-primary);
+      font-size: 12px;
+      letter-spacing: 1px;
+      margin: 0;
+    }
+  }
+}
+
+// tag default=gray
+.status-tag {
+  display: inline-block;
+  padding: 2px 8px;
+  line-height: 18px;
+  white-space: nowrap;
+  text-align: center;
+  border-radius: 4px;
+  font-size: 14px;
+  background-color: #F1F5F7;
+  color: #61758A;
+  border-width: 1px;
+  border-style: solid;
+  border-color: #DCE7EA;
+}
+.status-tag.green {
+  background-color: #EDF9F4;
+  color: #16845B;
+  border-color: #C7ECDB;
+}
+.status-tag.orange {
+  background-color: #FFF6E8;
+  color: #B76D0B;
+}
+.status-tag.red {
+  background-color: #FFF0F0;
+  color: #C24449;
+  border-color: #F7C8CB;
+}
+.status-tag.blue {
+  background-color: #E8F4FB;
+  color: #075DBA;
+  border-color: #B8DDF3;
+}
+.status-tag.secondary {
+  background: #E7F1F1;
+  color: #52697D;
+  border-color: #D3E4E4;
+}
+.my-editor {
+  width: 100%;
+}
+.ql-toolbar.ql-snow {
+  line-height: initial;
+}
+.ql-container.ql-snow {
+  max-height: 520px;
+  overflow-y: auto;
+}
+.ql-editor {
+  font-size: 1rem;
+  min-height: 240px;
+}

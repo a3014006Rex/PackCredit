@@ -1,0 +1,186 @@
+/*
+----------------------------------------------------
+[Custom Style for Element+]
+- 
+- 
+- 
+----------------------------------------------------
+*/
+@mixin scrollbar {
+  &::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  &::-webkit-scrollbar-track {
+    background: var(--color-surface, #ffffff);
+  }
+  &::-webkit-scrollbar-thumb {
+    background: #A8DCD9;
+    border-radius: var(--border-radius-base, 8px);
+    transition: var(--transition-base, all 0.3s ease-in-out);
+  }
+  &::-webkit-scrollbar-thumb:hover {
+    background: #3CACA8;
+  }
+}
+
+.el-menu {
+  border-right: none;
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  @include scrollbar;
+  padding: 10px;
+  .el-menu-item {
+    border-radius: 5px;
+    line-height: 48px;
+    height: 48px;
+    margin-bottom: 3px;
+  }
+  .el-menu-item.is-active {
+    background: var(--el-color-primary);
+    color: white;
+  }
+  .el-sub-menu__title {
+    border-radius: 5px;
+    line-height: 48px;
+    height: 48px;
+  }
+}
+.el-menu--collapse {
+  padding: 0;
+  .el-menu-item,
+  .el-sub-menu__title {
+    border-radius: 0;
+    margin-bottom: 0px;
+  }
+}
+.el-form {
+  --el-disabled-text-color: #61758A;
+}
+.el-table.deep {
+  --el-table-row-hover-bg-color: rgba(216, 243, 239, 0.82);
+  --el-table-border-color: #CFE2E2;
+  thead {
+    th {
+      background-color: #F3F9F9;
+      font-weight: normal;
+      color: var(--color-text-primary);
+    }
+  }
+}
+.el-table.green {
+  border-radius: 10px;
+  overflow: hidden;
+  th.el-table__cell {
+    background-color: var(--el-color-primary);
+    color: white;
+  }
+}
+
+.el-steps {
+  .el-step {
+    .el-step__head {
+      display: none;
+    }
+    .is-finish {
+      font-weight: bold;
+    }
+  }
+}
+.el-select {
+  min-width: 225px;
+  max-width: 330px;
+}
+.el-input {
+  min-width: 225px;
+  max-width: 330px;
+}
+.el-tag--info {
+  border: none !important;
+  font-size: 1rem !important;
+  color: #075DBA !important;
+  background-color: #E8F4FB !important;
+}
+
+.el-radio__input.is-disabled + span.el-radio__label {
+  color: #61758A;
+}
+.el-radio__input.is-disabled.is-checked {
+  .el-radio__inner {
+    background-color: #075DBA;
+
+    &::after {
+      background-color: white;
+    }
+  }
+}
+.el-dialog {
+  .el-select {
+    max-width: 100%;
+  }
+  .el-input {
+    max-width: 100%;
+  }
+}
+.el-form {
+  .el-card {
+    margin-bottom: 20px;
+  }
+  .el-form-item {
+    .flex {
+      display: flex;
+      * {
+        margin-right: 8px;
+        &:last-child {
+          margin-right: 0;
+        }
+      }
+    }
+    .note {
+      width: 100%;
+      line-height: 18px;
+    }
+    .pay-methods {
+      display: flex;
+      flex-wrap: wrap;
+      .item {
+        margin-bottom: 12px;
+        margin-right: 16px;
+        display: flex;
+        .el-checkbox {
+          margin-right: 12px;
+        }
+
+        .el-select {
+          min-width: 200px;
+          max-width: 500px;
+        }
+      }
+      .note {
+        color: red;
+      }
+    }
+  }
+}
+.el-date-editor {
+  --el-date-editor-daterange-width: 225px !important;
+  .el-range-separator {
+    padding: 0 !important;
+  }
+}
+
+.el-button--primary.is-plain {
+  background-color: white;
+  &:hover {
+    background-color: #075DBA;
+  }
+}
+// .el-divider__text {
+//   background-color: #eeeff1;
+// }
+// td.today {
+//   span {
+//     border: 1px solid #24316f;
+//   }
+// }
