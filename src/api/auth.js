@@ -1,6 +1,6 @@
 import request from "./index";
 
-const apiBaseUrl = `${import.meta.env.VITE_BASEURL}`.replace(/\/$/, "");
+const apiBaseUrl = `${import.meta.env.VITE_API_BASE_PATH || "/api"}`.replace(/\/$/, "");
 
 export const AuthAPI = {
   // 後台 LoginAPIController
@@ -22,7 +22,7 @@ export const AuthAPI = {
     request.get("/sysNEWSAPI/List", { page, pageSize }),
   GetNewsDetail: (newsId) => request.get(`/sysNEWSAPI/Detail/${newsId}`),
   GetNewsAttachmentUrl: (newsId, fileId) =>
-    `${apiBaseUrl}/api/sysNEWSAPI/Attachment/${encodeURIComponent(newsId)}/${encodeURIComponent(fileId)}`,
+    `${apiBaseUrl}/sysNEWSAPI/Attachment/${encodeURIComponent(newsId)}/${encodeURIComponent(fileId)}`,
 
   // 後台 TbProductAPIController（公開）
   GetLatestProducts: () => request.get("/TbProductAPI/Latest"),

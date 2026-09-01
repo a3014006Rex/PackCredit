@@ -17,7 +17,7 @@ export const AppUser = {
   SyncADUserMenuRole: () => {
     // 創建一個新的axios實例，不使用全域攔截器
     const silentAxios = axios.create({
-      baseURL: import.meta.env.VITE_BASEURL + "/api"
+      baseURL: import.meta.env.VITE_API_BASE_PATH || "/api"
     });
     
     // 設定授權標頭

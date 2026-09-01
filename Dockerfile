@@ -11,8 +11,10 @@ RUN npm run build
 # ---- Run Stage ----
 FROM nginx:alpine AS run-stage
 
-# Copy custom nginx configuration
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+# Nginx 官方 entrypoint 會在容器啟動時以環境變數產生設定，API Key 不進入映像檔。
+ENV PACKCREDIT_API_UPSTREAM=http://packcreditmanagement:8080 \
+    PACKCREDIT_CLIENT_ID=packcredit-web-gateway
+COPY nginx.conf /etc/nginx/templates/default.conf.template
 
 # Copy the built app from the build stage
 COPY --from=build-stage /app/dist /usr/share/nginx/html

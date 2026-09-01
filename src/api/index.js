@@ -15,7 +15,7 @@ if (initToken) {
   axios.defaults.headers.common["Authorization"] = "Bearer " + initToken;
 }
 
-axios.defaults.baseURL = import.meta.env.VITE_BASEURL + "/api";
+axios.defaults.baseURL = import.meta.env.VITE_API_BASE_PATH || "/api";
 
 axios.interceptors.response.use(
   (response) => {
@@ -35,6 +35,19 @@ axios.interceptors.response.use(
           });
           break;
         case 401:
+          if (
+            String(err.response.data?.errorCode || err.response.data?.ErrorCode || "")
+              .toUpperCase()
+              .startsWith("API_KEY_")
+          ) {
+            ElMessage({
+              message: "API 閘道驗證失敗，請聯絡系統管理員檢查服務設定。",
+              center: true,
+              iconClass: "el-icon-circle-close",
+              type: "error",
+            });
+            break;
+          }
           ElMessage({
             message:
               err.response.data.ErrorMsg ||
@@ -64,7 +77,6 @@ axios.interceptors.response.use(
         case 404:
           // 靜默處理 404，避免 API 尚未實作時噴大量 popup
           console.warn("404 Not Found:", err.config?.url);
-          break;
           break;
         case 500:
           ElMessage({
