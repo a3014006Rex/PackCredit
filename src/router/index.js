@@ -84,6 +84,18 @@ const router = createRouter({
           },
         },
 
+        // 會員資料變更申請（限登入帳號所屬公司）
+        {
+          path: "/member-data-change",
+          component: () => import("../views/main/member-data-change.vue"),
+          meta: { name: "會員資料變更申請", requireAuth: true },
+          children: [
+            { path: "", name: "MemberDataChanges", component: () => import("../views/main/member-data-change/index.vue"), meta: { name: "申請紀錄" } },
+            { path: "create", name: "MemberDataChangeCreate", component: () => import("../views/main/member-data-change/create.vue"), meta: { name: "提出資料變更申請" } },
+            { path: ":id", name: "MemberDataChangeDetail", component: () => import("../views/main/member-data-change/[id].vue"), meta: { name: "申請明細" } },
+          ],
+        },
+
         // 公司聯絡人帳號（公司管理者）
         {
           path: "/company-members",
@@ -186,12 +198,12 @@ const router = createRouter({
           ],
         },
 
-        // 訂單管理
+        // 前台公司訂單由後端依登入會員的公司識別碼授權。
         {
           path: "/order",
           component: () => import("../views/main/order.vue"),
           meta: {
-            name: "訂單管理",
+            name: "公司訂單",
             isRoute: false,
             requireAuth: true,
           },
@@ -200,9 +212,7 @@ const router = createRouter({
               path: "",
               component: () => import("../views/main/order/index.vue"),
               meta: {
-                name: "訂單管理",
-                menu: "訂單管理",
-                role: "list",
+                name: "公司訂單",
               },
             },
             {
@@ -210,8 +220,6 @@ const router = createRouter({
               component: () => import("../views/main/order/[id].vue"),
               meta: {
                 name: "訂單詳細",
-                menu: "訂單管理",
-                role: "view",
               },
             },
           ],

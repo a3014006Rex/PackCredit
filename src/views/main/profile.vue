@@ -1,9 +1,20 @@
 <script setup>
 import dayjs from "dayjs";
 import { AuthAPI } from "@/api/auth";
+import {
+  companyDocumentAccept,
+  formatFileSize,
+  saveDownloadResponse,
+  validateCompanyDocument,
+} from "@/utils/companyDocument";
+
+const router = useRouter();
 
 const loading = ref(false);
 const loadError = ref("");
+const registerFileInput = ref();
+const registerFile = ref(null);
+const replacingRegisterFile = ref(false);
 const profile = reactive({
   account: {},
   company: {},
@@ -56,6 +67,46 @@ const permissionLabels = (target) => [
   target?.canViewInvoice && "查看發票",
   target?.canManageCompany && "公司管理",
 ].filter(Boolean);
+
+const selectRegisterFile = (event) => {
+  const file = event.target.files?.[0] || null;
+  const message = validateCompanyDocument(file);
+  if (message) {
+    ElMessage.error(message);
+    registerFile.value = null;
+    event.target.value = "";
+    return;
+  }
+  registerFile.value = file;
+};
+
+const replaceRegisterFile = async () => {
+  if (!registerFile.value) {
+    ElMessage.warning("請選擇要上傳的附件");
+    return;
+  }
+  replacingRegisterFile.value = true;
+  try {
+    const response = await AuthAPI.ReplaceRegisterFile(registerFile.value);
+    ElMessage.success(response.data.message || "註冊附件已更換");
+    registerFile.value = null;
+    if (registerFileInput.value) registerFileInput.value.value = "";
+    await loadProfile();
+  } catch (error) {
+    ElMessage.error(error.response?.data?.message || "註冊附件更換失敗");
+  } finally {
+    replacingRegisterFile.value = false;
+  }
+};
+
+const downloadRegisterFile = async (file) => {
+  try {
+    const response = await AuthAPI.DownloadRegisterFile(file.fileId);
+    saveDownloadResponse(response, file.fileName);
+  } catch (error) {
+    ElMessage.error(error.response?.data?.message || "註冊附件下載失敗");
+  }
+};
 
 const loadProfile = async () => {
   loading.value = true;
@@ -114,12 +165,17 @@ onMounted(loadProfile);
 
       <template v-else>
         <el-alert
-          title="本頁資料為唯讀資料；如需修改，請透過資料變更申請提出。"
+          title="公司與帳號欄位為唯讀；如需修改請提出資料變更申請。待首次儲值期間可在下方更換註冊附件。"
           type="info"
           show-icon
           :closable="false"
           class="profile-notice"
-        />
+        >
+          <template #default>
+            <el-button type="primary" link @click="router.push({ name: 'MemberDataChanges' })">查看申請紀錄</el-button>
+            <el-button type="primary" link @click="router.push({ name: 'MemberDataChangeCreate' })">提出資料變更申請</el-button>
+          </template>
+        </el-alert>
 
         <section class="profile-card">
           <div class="section-title">
@@ -133,7 +189,7 @@ onMounted(loadProfile);
           <div class="data-grid">
             <div class="data-item"><span>登入帳號</span><strong>{{ display(profile.account.loginId) }}</strong></div>
             <div class="data-item"><span>姓名</span><strong>{{ display(currentContact?.memberName || profile.account.userName) }}</strong></div>
-            <div class="data-item"><span>部門／職稱</span><strong>{{ display([currentContact?.department || profile.account.department, currentContact?.jobTitle].filter(Boolean).join("／")) }}</strong></div>
+            <div class="data-item"><span>部門／職稱</span><strong>{{ display([currentContact?.departmentName || currentContact?.department || profile.account.departmentName || profile.account.department, currentContact?.jobTitle].filter(Boolean).join("／")) }}</strong></div>
             <div class="data-item"><span>電子信箱</span><strong>{{ display(currentContact?.email || profile.account.email) }}</strong></div>
             <div class="data-item"><span>行動電話</span><strong>{{ display(currentContact?.mobilePhone || profile.account.mobilePhone) }}</strong></div>
             <div class="data-item"><span>市內電話</span><strong>{{ formatPhone(currentContact?.telephone || profile.account.telephone, currentContact?.extension || profile.account.extension) }}</strong></div>
@@ -174,6 +230,26 @@ onMounted(loadProfile);
             <div class="data-item"><span>註冊日期</span><strong>{{ formatDate(profile.company.registrationDate) }}</strong></div>
             <div class="data-item"><span>主要聯絡人</span><strong>{{ display(primaryContact?.memberName) }}</strong></div>
           </div>
+          <div class="company-file">
+            <div class="company-file__title">註冊附件</div>
+            <div v-if="profile.company.registerFiles?.length" class="company-file__list">
+              <div v-for="file in profile.company.registerFiles" :key="file.fileId" class="company-file__item">
+                <div>
+                  <strong>{{ file.fileName }}</strong>
+                  <small>{{ formatFileSize(file.fileSize) }}・{{ formatDate(file.uploadedAt) }}</small>
+                </div>
+                <el-button type="primary" link @click="downloadRegisterFile(file)">下載</el-button>
+              </div>
+            </div>
+            <span v-else class="company-file__empty">未上傳</span>
+            <div v-if="profile.company.canReplaceRegisterFile" class="company-file__replace">
+              <input ref="registerFileInput" type="file" :accept="companyDocumentAccept" @change="selectRegisterFile" />
+              <el-button type="primary" :loading="replacingRegisterFile" @click="replaceRegisterFile">
+                上傳／更換附件
+              </el-button>
+              <small>公司完成首次儲值前可更換；更換後原附件會永久刪除。</small>
+            </div>
+          </div>
         </section>
 
         <section class="profile-card">
@@ -195,7 +271,7 @@ onMounted(loadProfile);
               <div class="contact-card__header">
                 <div>
                   <h3>{{ contact.memberName }}</h3>
-                  <p>{{ display([contact.department, contact.jobTitle].filter(Boolean).join("／")) }}</p>
+                  <p>{{ display([contact.departmentName || contact.department, contact.jobTitle].filter(Boolean).join("／")) }}</p>
                 </div>
                 <div class="contact-tags">
                   <el-tag v-if="contact.isCurrentUser" type="primary" size="small">目前登入者</el-tag>
@@ -228,13 +304,6 @@ onMounted(loadProfile);
   background:
     radial-gradient(circle at top right, rgba(27, 154, 170, .12), transparent 30%),
     #f5f7fa;
-}
-
-.profile-header,
-.profile-content {
-  max-width: 1040px;
-  margin-right: auto;
-  margin-left: auto;
 }
 
 .profile-header {
@@ -392,6 +461,17 @@ onMounted(loadProfile);
 
 .permission-tags { display: flex; flex-wrap: wrap; gap: 6px; }
 .contact-permissions { margin-top: 12px; }
+.company-file { margin-top: 22px; padding-top: 18px; border-top: 1px solid #edf0f4; }
+.company-file__title { margin-bottom: 10px; color: #52606d; font-weight: 700; }
+.company-file__list { display: grid; gap: 8px; }
+.company-file__item,
+.company-file__replace { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; }
+.company-file__item { justify-content: space-between; padding: 10px 12px; border-radius: 8px; background: #f7f9fb; }
+.company-file__item div { display: grid; gap: 3px; }
+.company-file__item small,
+.company-file__replace small,
+.company-file__empty { color: #7b8794; }
+.company-file__replace { margin-top: 12px; }
 
 @media (max-width: 640px) {
   .profile-page { padding: 22px 14px; }

@@ -1,4 +1,5 @@
 import request from "./index";
+import { toCompanyDocumentFormData } from "@/utils/companyDocument";
 
 const apiBaseUrl = `${import.meta.env.VITE_API_BASE_PATH || "/api"}`.replace(/\/$/, "");
 
@@ -34,8 +35,12 @@ export const AuthAPI = {
     request.get("/TrQaCollectionAPI/List", { page, pageSize }),
   CreateQaQuestion: (data) => request.post("/TrQaCollectionAPI/Create", data),
 
-  // 後台 MemberProfileAPIController（需會員登入、唯讀）
+  // 後台 MemberProfileAPIController（需會員登入；資料唯讀，待首次儲值可換註冊附件）
   GetMemberProfile: () => request.get("/MemberProfileAPI/Current"),
+  ReplaceRegisterFile: (file) =>
+    request.post("/MemberProfileAPI/RegisterFile", toCompanyDocumentFormData({}, file)),
+  DownloadRegisterFile: (fileId) =>
+    request.get(`/MemberProfileAPI/RegisterFile/${encodeURIComponent(fileId)}`, {}, { responseType: "blob" }),
 
   // 公司聯絡人帳號（需公司管理權限）
   GetCompanyMembers: () => request.get("/CompanyMemberAPI/List"),
@@ -54,5 +59,6 @@ export const AuthAPI = {
   CheckTaxID: (taxID) => request.get("/RegisterAPI/CheckTaxID", { taxID }),
   CheckCompanyName: (companyName) => request.get("/RegisterAPI/CheckCompanyName", { companyName }),
   CheckEmail: (email) => request.get("/RegisterAPI/CheckEmail", { email }),
-  Register: (data) => request.post("/RegisterAPI/Register", data),
+  Register: (data, file = null) =>
+    request.post("/RegisterAPI/Register", toCompanyDocumentFormData(data, file)),
 };

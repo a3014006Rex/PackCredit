@@ -84,6 +84,10 @@ const logout = () => {
 };
 
 const handleUserCommand = (command) => {
+  if (command === "memberDataChange") {
+    router.push({ name: "MemberDataChanges" });
+    return;
+  }
   if (command === "profile") {
     router.push({ name: "MemberProfile" });
     return;
@@ -96,6 +100,11 @@ const handleUserCommand = (command) => {
 
   if (command === "topUp") {
     router.push({ name: "TopUp" });
+    return;
+  }
+
+  if (command === "orders") {
+    router.push("/order");
     return;
   }
 
@@ -201,6 +210,10 @@ onMounted(loadPortalMenus);
               <i class="bx bx-id-card"></i>
               個人及企業資料
             </el-dropdown-item>
+            <el-dropdown-item command="memberDataChange">
+              <i class="bx bx-edit"></i>
+              會員資料變更申請
+            </el-dropdown-item>
             <el-dropdown-item command="qa">
               <i class="bx bx-message-square-dots"></i>
               公司 Q&amp;A
@@ -209,6 +222,10 @@ onMounted(loadPortalMenus);
               <i class="bx bx-wallet"></i>
               公司儲值
               <el-tag v-if="memberAccess.memberStatusCode === 'Member_Status_PENDING_TOPUP'" type="warning" size="small">待開通</el-tag>
+            </el-dropdown-item>
+            <el-dropdown-item command="orders">
+              <i class="bx bx-receipt"></i>
+              公司訂單
             </el-dropdown-item>
             <el-dropdown-item v-if="memberAccess.canManageCompany" command="companyMembers">
               <i class="bx bx-group"></i>

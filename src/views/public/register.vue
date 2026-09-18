@@ -1,9 +1,13 @@
 <script setup>
+import { genFileId } from "element-plus";
 import { AuthAPI } from "@/api/auth";
 import { Register as rules } from "@/plugins/rules";
+import { companyDocumentAccept, validateCompanyDocument } from "@/utils/companyDocument";
 
 const router = useRouter();
 const formRef = ref();
+const uploadRef = ref();
+const registerFile = ref(null);
 const loading = ref(false);
 const registrationComplete = ref(false);
 const sameAsEmail = ref(false);
@@ -62,6 +66,25 @@ const validateConfirmPassword = (_rule, value, callback) => {
 const localRules = {
   ...rules,
   confirmPassword: [{ validator: validateConfirmPassword, trigger: "blur" }],
+};
+
+const handleFileChange = (uploadFile) => {
+  const message = validateCompanyDocument(uploadFile.raw);
+  if (message) {
+    ElMessage.error(message);
+    registerFile.value = null;
+    nextTick(() => uploadRef.value?.clearFiles());
+    return;
+  }
+  registerFile.value = uploadFile.raw;
+};
+const handleFileRemove = () => { registerFile.value = null; };
+const handleFileExceed = (files) => {
+  const file = files?.[0];
+  if (!file) return;
+  uploadRef.value?.clearFiles();
+  file.uid = genFileId();
+  uploadRef.value?.handleStart(file);
 };
 
 watch(sameAsEmail, (val) => {
@@ -237,7 +260,7 @@ const handleSubmit = async () => {
       memberRightsKey: memberRights.value.pcKey,
       memberRightsHash: memberRights.value.contentHash,
     };
-    const res = await AuthAPI.Register(payload);
+    const res = await AuthAPI.Register(payload, registerFile.value);
     if (res.data.success) {
       registrationComplete.value = true;
     } else {
@@ -297,7 +320,6 @@ onMounted(() => {
             <span v-if="registerParameterError" class="parameter-error">
               {{ registerParameterError }}
             </span>
-            <span class="hint-text">實際繳費金額需另加5%營業稅</span>
           </el-form-item>
 
           <el-form-item label="會員名稱／公司" prop="companyName">
@@ -445,6 +467,24 @@ onMounted(() => {
             </el-radio-group>
           </el-form-item>
 
+          <el-form-item label="申請附件">
+            <div class="document-upload">
+              <el-upload
+                ref="uploadRef"
+                action="#"
+                :auto-upload="false"
+                :limit="1"
+                :accept="companyDocumentAccept"
+                :on-change="handleFileChange"
+                :on-remove="handleFileRemove"
+                :on-exceed="handleFileExceed"
+              >
+                <el-button type="primary" plain>選擇檔案</el-button>
+              </el-upload>
+              <span class="hint-text">選填，限 PDF、Word、Excel、JPG、PNG，檔案上限 10 MB</span>
+            </div>
+          </el-form-item>
+
           <el-form-item label="會員權益" required>
             <div class="rights-agreement">
               <el-button
@@ -584,6 +624,7 @@ onMounted(() => {
 }
 .address-row { display: flex; gap: 8px; }
 .invoice-email-row { display: flex; align-items: center; }
+.document-upload { width: 100%; }
 .rights-agreement {
   display: flex;
   flex-wrap: wrap;

@@ -229,8 +229,7 @@ onMounted(loadQaList);
 }
 
 .qa-header {
-  max-width: 1040px;
-  margin: 0 auto 24px;
+  margin-bottom: 24px;
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
@@ -262,9 +261,7 @@ onMounted(loadQaList);
 }
 
 .qa-list-section {
-  max-width: 1040px;
   min-height: 260px;
-  margin: 0 auto;
 }
 
 .qa-list {

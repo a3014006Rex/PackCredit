@@ -1,8 +1,13 @@
 import request from "./index";
 
 export const Order = {
-  List: (data) => request.post("/Order/List", data),
-  GetById: (id) => request.get(`/Order/${id}`),
-  UpdateStatus: (id, data) => request.put(`/Order/${id}/Status`, data),
-  Cancel: (id, data) => request.put(`/Order/${id}/Cancel`, data),
+  CheckoutPreview: () => request.get("/OrderAPI/CheckoutPreview"),
+  Checkout: (data) => request.post("/OrderAPI/Checkout", data),
+  GetByRequest: (requestId) =>
+    request.get(`/OrderAPI/Request/${encodeURIComponent(requestId)}`),
+  List: (params = {}) => request.get("/OrderAPI/List", params),
+  Options: () => request.get("/OrderAPI/Options"),
+  GetById: (id) => request.get(`/OrderAPI/Detail/${encodeURIComponent(id)}`),
+  DownloadInvoice: (id) =>
+    request.get(`/OrderAPI/Invoice/${encodeURIComponent(id)}`, {}, { responseType: "blob" }),
 };

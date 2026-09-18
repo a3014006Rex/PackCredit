@@ -1,157 +1,124 @@
 <script setup>
 import { Order } from "@/api/order";
+import { saveDownloadResponse } from "@/utils/companyDocument";
 
 const router = useRouter();
 const route = useRoute();
 const loading = ref(false);
+const downloadingInvoice = ref(false);
+const loadError = ref("");
+const order = ref(null);
+const statusLabels = ref({});
+const paymentLabels = ref({});
+let latestRequest = 0;
 
-const order = reactive({
-  orderNo: "",
-  memberName: "",
-  memberEmail: "",
-  memberPhone: "",
-  orderStatus: "",
-  totalAmount: 0,
-  note: "",
-  createDate: "",
-  items: [],
-});
+const loadOptions = async () => {
+  try {
+    const response = await Order.Options();
+    statusLabels.value = Object.fromEntries(
+      (response.data?.data?.orderStatuses || []).map((option) => [option.value, option.label])
+    );
+    paymentLabels.value = Object.fromEntries(
+      (response.data?.data?.paymentStatuses || []).map((option) => [option.value, option.label])
+    );
+  } catch {
+    statusLabels.value = {};
+    paymentLabels.value = {};
+  }
+};
 
-const statusUpdateLoading = ref(false);
-const selectedStatus = ref("");
-
-const statusOptions = [
-  { value: "已確認", label: "已確認" },
-  { value: "備貨中", label: "備貨中" },
-  { value: "已出貨", label: "已出貨" },
-  { value: "已完成", label: "已完成" },
-  { value: "已取消", label: "已取消" },
-];
-
-const initData = async () => {
+const loadOrder = async () => {
+  const requestId = ++latestRequest;
   loading.value = true;
+  loadError.value = "";
+  order.value = null;
   try {
-    const res = await Order.GetById(route.params.id);
-    Object.assign(order, res.data);
-    selectedStatus.value = order.orderStatus;
+    const response = await Order.GetById(route.params.id);
+    if (requestId !== latestRequest) return;
+    if (!response.data?.success || !response.data?.data) throw new Error("訂單資料格式不正確");
+    order.value = response.data.data;
   } catch (error) {
-    console.log(error);
+    if (requestId !== latestRequest) return;
+    order.value = null;
+    loadError.value = error.response?.data?.message || "無法取得訂單明細，請稍後再試";
+  } finally {
+    if (requestId === latestRequest) loading.value = false;
   }
-  loading.value = false;
 };
+const formatDate = (value) => value ? new Date(value).toLocaleString("zh-TW") : "－";
 
-const handleUpdateStatus = async () => {
-  if (!selectedStatus.value || selectedStatus.value === order.orderStatus) return;
-  await ElMessageBox.confirm(
-    `確定將訂單狀態更改為「${selectedStatus.value}」嗎？`,
-    "系統提示",
-    { confirmButtonText: "確認", cancelButtonText: "取消", type: "warning" }
-  );
-  statusUpdateLoading.value = true;
+const downloadInvoice = async () => {
+  if (!order.value?.invoiceFile || downloadingInvoice.value) return;
+  downloadingInvoice.value = true;
   try {
-    await Order.UpdateStatus(route.params.id, { status: selectedStatus.value });
-    order.orderStatus = selectedStatus.value;
-    ElNotification({ title: "系統提示", message: "狀態更新成功", type: "success" });
-  } catch (error) {
-    console.log(error);
+    const response = await Order.DownloadInvoice(order.value.orderID);
+    saveDownloadResponse(response, order.value.invoiceFile.fileName || `發票-${order.value.orderNo}`);
+  } catch {
+    ElMessage.error("發票下載失敗，請確認帳號權限或稍後再試");
+  } finally {
+    downloadingInvoice.value = false;
   }
-  statusUpdateLoading.value = false;
 };
 
-const getOrderStatusClass = (status) => {
-  const map = {
-    "待確認": "blue", "已確認": "blue", "備貨中": "blue",
-    "已出貨": "green", "已完成": "green",
-    "已取消": "secondary", "退貨處理中": "blue", "已退款": "secondary",
-  };
-  return map[status] || "";
-};
-
-onMounted(() => {
-  initData();
-});
+watch(() => route.params.id, loadOrder, { immediate: true });
+onMounted(loadOptions);
 </script>
 
 <template>
-  <InSideLayout
-    click1="返回列表"
-    :loading="loading"
-    @back="router.back()"
-    @click1="router.back()"
-  >
+  <InSideLayout click1="返回公司訂單" :loading="loading" @back="router.push('/order')" @click1="router.push('/order')">
     <template #title>訂單詳細</template>
-
-    <div v-loading="loading">
-      <!-- 訂單基本資訊 -->
-      <el-card class="mb-4">
-        <template #header><span>訂單資訊</span></template>
-        <el-descriptions :column="2" border>
-          <el-descriptions-item label="訂單編號">{{ order.orderNo }}</el-descriptions-item>
-          <el-descriptions-item label="建立時間">{{ order.createDate }}</el-descriptions-item>
-          <el-descriptions-item label="採購企業">{{ order.memberName }}</el-descriptions-item>
-          <el-descriptions-item label="聯絡電話">{{ order.memberPhone }}</el-descriptions-item>
-          <el-descriptions-item label="電子郵件">{{ order.memberEmail }}</el-descriptions-item>
-          <el-descriptions-item label="訂單金額">{{ $price(order.totalAmount) }} 元</el-descriptions-item>
-          <el-descriptions-item label="訂單狀態">
-            <span :class="getOrderStatusClass(order.orderStatus)">{{ order.orderStatus }}</span>
-          </el-descriptions-item>
-          <el-descriptions-item label="備註">{{ order.note }}</el-descriptions-item>
-        </el-descriptions>
-      </el-card>
-
-      <!-- 更新狀態 -->
-      <el-card class="mb-4" v-if="$auth('訂單管理', 'modify')">
-        <template #header><span>更新訂單狀態</span></template>
-        <el-form inline>
-          <el-form-item label="變更狀態為">
-            <el-select v-model="selectedStatus" style="width: 180px">
-              <el-option
-                v-for="opt in statusOptions"
-                :key="opt.value"
-                :label="opt.label"
-                :value="opt.value"
-              />
-            </el-select>
-          </el-form-item>
-          <el-form-item>
-            <el-button
-              type="primary"
-              :loading="statusUpdateLoading"
-              @click="handleUpdateStatus"
-            >確認更新</el-button>
-          </el-form-item>
-        </el-form>
-      </el-card>
-
-      <!-- 訂單商品明細 -->
-      <el-card>
-        <template #header><span>商品明細</span></template>
-        <el-table :data="order.items" stripe>
-          <el-table-column prop="productName" label="商品名稱" min-width="180" />
-          <el-table-column prop="specification" label="規格" width="150" />
-          <el-table-column label="單價" width="120">
-            <template #default="{ row }">{{ $price(row.unitPrice) }}</template>
-          </el-table-column>
-          <el-table-column prop="quantity" label="數量" width="100" />
-          <el-table-column label="小計" width="130">
-            <template #default="{ row }">{{ $price(row.subtotal) }}</template>
-          </el-table-column>
-        </el-table>
-        <div class="order-total">
-          合計：<strong>{{ $price(order.totalAmount) }}</strong> 元
-        </div>
-      </el-card>
-    </div>
+    <template #main>
+      <div v-loading="loading" class="order-detail-content">
+        <el-alert v-if="loadError" :title="loadError" type="error" show-icon :closable="false">
+          <el-button link type="primary" @click="loadOrder">重新載入</el-button>
+        </el-alert>
+        <template v-if="order">
+          <el-card class="mb-4">
+            <template #header><span>訂單資訊</span></template>
+            <el-descriptions :column="2" border>
+              <el-descriptions-item label="訂單編號">{{ order.orderNo }}</el-descriptions-item>
+              <el-descriptions-item label="下單時間">{{ formatDate(order.orderedAt) }}</el-descriptions-item>
+              <el-descriptions-item label="訂購公司">{{ order.companyName }}</el-descriptions-item>
+              <el-descriptions-item label="下單人員">{{ order.memberName }}</el-descriptions-item>
+              <el-descriptions-item label="訂單狀態">{{ statusLabels[order.orderStatusCode] || order.orderStatusCode }}</el-descriptions-item>
+              <el-descriptions-item label="付款狀態">{{ paymentLabels[order.paymentStatusCode] || order.paymentStatusCode }}</el-descriptions-item>
+              <el-descriptions-item label="收件人">{{ order.receiverName }}</el-descriptions-item>
+              <el-descriptions-item label="收件電話">{{ order.receiverPhone }}</el-descriptions-item>
+              <el-descriptions-item label="收件地址" :span="2">{{ order.shippingAddress }}</el-descriptions-item>
+              <el-descriptions-item label="訂單備註" :span="2">{{ order.customerRemark || '－' }}</el-descriptions-item>
+              <el-descriptions-item label="發票附件" :span="2">
+                <el-button v-if="order.invoiceFile" type="primary" link :loading="downloadingInvoice" @click="downloadInvoice">
+                  下載 {{ order.invoiceFile.fileName || '發票' }}
+                </el-button>
+                <span v-else>尚未提供，或目前帳號沒有發票下載權限</span>
+              </el-descriptions-item>
+            </el-descriptions>
+          </el-card>
+          <el-card>
+            <template #header><span>商品明細</span></template>
+            <el-table :data="order.items" stripe>
+              <el-table-column prop="productName" label="商品名稱" min-width="180" />
+              <el-table-column prop="specification" label="規格" min-width="140" />
+              <el-table-column label="單價" width="130">
+                <template #default="{ row }">NT$ {{ $price(row.unitPrice) }}</template>
+              </el-table-column>
+              <el-table-column prop="quantity" label="數量" width="100" />
+              <el-table-column label="小計" width="130">
+                <template #default="{ row }">NT$ {{ $price(row.lineAmount) }}</template>
+              </el-table-column>
+              <template #empty><el-empty description="此訂單沒有商品明細" /></template>
+            </el-table>
+            <div class="order-total">合計：<strong>NT$ {{ $price(order.totalAmount) }}</strong></div>
+          </el-card>
+        </template>
+      </div>
+    </template>
   </InSideLayout>
 </template>
 
 <style lang="scss" scoped>
+.order-detail-content { min-height: 120px; }
 .mb-4 { margin-bottom: 16px; }
-.order-total {
-  text-align: right;
-  margin-top: 12px;
-  font-size: 15px;
-  color: $text-primary;
-  strong { color: $primary; font-size: 18px; }
-}
+.order-total { text-align: right; margin-top: 16px; }
+.order-total strong { color: $primary; font-size: 18px; }
 </style>

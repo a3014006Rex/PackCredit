@@ -28,7 +28,7 @@ axios.interceptors.response.use(
       switch (err.response.status) {
         case 400:
           ElMessage({
-            message: err.response.data || "400 error",
+            message: err.response.data?.message || err.response.data?.Message || "輸入資料不正確，請確認後再試。",
             center: true,
             iconClass: "el-icon-circle-close",
             type: "error",
@@ -121,10 +121,11 @@ axios.interceptors.response.use(
 );
 
 const request = {
-  get(url, params = {}) {
+  get(url, params = {}, config = {}) {
     return new Promise((resolve, reject) => {
       axios
         .get(url, {
+          ...config,
           params: params,
         })
         .then((response) => {
